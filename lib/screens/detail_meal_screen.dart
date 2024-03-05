@@ -1,36 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meals_app/modules/meals/models/meals.dart';
+import 'package:meals_app/providers/favorites_provider.dart';
 
-class DetailMealScreen extends StatefulWidget {
+class DetailMealScreen extends ConsumerWidget {
   const DetailMealScreen({
     super.key,
     required this.meal,
-    required this.onToggleFavorite,
   });
 
   final Meal meal;
-  final void Function(Meal meal) onToggleFavorite;
 
   @override
-  State<DetailMealScreen> createState() {
-    return _DetailMealScreenState();
-  }
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final favoriteMeals = ref.watch(favoriteMealsProvider);
+    final isFavorite = favoriteMeals.contains(meal);
 
-class _DetailMealScreenState extends State<DetailMealScreen> {
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.meal.title),
+        title: Text(meal.title),
         actions: [
           IconButton(
             onPressed: () {
-              widget.onToggleFavorite(widget.meal);
+              final wasAdded = ref
+                  .read(favoriteMealsProvider.notifier)
+                  .toggleMealFavoriteStatus(meal);
+              ScaffoldMessenger.of(context).clearSnackBars();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    wasAdded
+                        ? 'Meal was added to the favorite meal'
+                        : 'Meal no longer become your favorite',
+                  ),
+                ),
+              );
             },
             icon: Icon(
-              Icons.star,
-              color: Theme.of(context).colorScheme.primary,
+              isFavorite ? Icons.star : Icons.star_border,
             ),
           )
         ],
@@ -43,7 +50,7 @@ class _DetailMealScreenState extends State<DetailMealScreen> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
-                  widget.meal.imageUrl,
+                  meal.imageUrl,
                   height: 300,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -62,7 +69,7 @@ class _DetailMealScreenState extends State<DetailMealScreen> {
               const SizedBox(
                 height: 14,
               ),
-              for (final ingredient in widget.meal.ingredients)
+              for (final ingredient in meal.ingredients)
                 Text(
                   ingredient,
                   style: Theme.of(context).textTheme.bodyMedium!.copyWith(
@@ -81,7 +88,7 @@ class _DetailMealScreenState extends State<DetailMealScreen> {
               const SizedBox(
                 height: 14,
               ),
-              for (final step in widget.meal.steps)
+              for (final step in meal.steps)
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,

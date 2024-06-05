@@ -197,7 +197,7 @@ const dummyMeals = [
     affordability: Affordability.luxurious,
     complexity: Complexity.simple,
     imageUrl:
-        'https://cdn.pixabay.com/photo/2016/10/25/13/29/smoked-salmon-salad-1768890_1280.jpg',
+        'https://cdn1-production-images-kly.akamaized.net/UdGxQFOr-QQtc5wFZcl9mvZcfwM=/800x450/smart/filters:quality(75):strip_icc():format(webp)/kly-media-production/medias/3390091/original/047746000_1614610130-Croatian_Salad.jpg',
     duration: 15,
     ingredients: [
       'Arugula',

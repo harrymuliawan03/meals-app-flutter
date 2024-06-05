@@ -5,7 +5,9 @@ import 'package:meals_app/providers/filters_provider.dart';
 import 'package:meals_app/screens/categories_screen.dart';
 import 'package:meals_app/screens/filters_screen.dart';
 import 'package:meals_app/screens/layout/drawer/main_drawer.dart';
+import 'package:meals_app/screens/meals_control_screen.dart';
 import 'package:meals_app/screens/meals_screen.dart';
+import 'package:meals_app/service/local_storage_service.dart';
 
 const kInitialFilters = {
   Filter.glutenFree: false,
@@ -25,6 +27,7 @@ class Layout extends ConsumerStatefulWidget {
 
 class _LayoutState extends ConsumerState<Layout> {
   int _selectedPageIndex = 0;
+  final name = LocalStorage.getStringData('user_name');
 
   void _selectPage(int index) {
     setState(() {
@@ -38,6 +41,13 @@ class _LayoutState extends ConsumerState<Layout> {
       Navigator.of(context).push<Map<Filter, bool>>(
         MaterialPageRoute(
           builder: (ctx) => const FiltersScreen(),
+        ),
+      );
+    }
+    if (identifier == 'meals-control') {
+      Navigator.of(context).push<Map<Filter, bool>>(
+        MaterialPageRoute(
+          builder: (ctx) => const MealsControlScreen(),
         ),
       );
     }
@@ -62,7 +72,7 @@ class _LayoutState extends ConsumerState<Layout> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(activePageTitle),
+        title: Text(name ?? ''),
       ),
       drawer: MainDrawer(onSetScreen: _setScreen),
       body: activePage,

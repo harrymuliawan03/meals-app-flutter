@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:meals_app/screens/login_screen.dart';
+import 'package:meals_app/service/local_storage_service.dart';
 
 class MainDrawer extends StatelessWidget {
   const MainDrawer({super.key, required this.onSetScreen});
@@ -7,6 +9,8 @@ class MainDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final role = LocalStorage.getStringData('role');
+
     return Drawer(
       child: Column(
         children: [
@@ -40,12 +44,12 @@ class MainDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: Icon(
-              Icons.restaurant,
+              Icons.home,
               size: 26,
               color: Theme.of(context).colorScheme.onBackground,
             ),
             title: Text(
-              'Meals',
+              'Home',
               style: Theme.of(context).textTheme.titleSmall!.copyWith(
                     color: Theme.of(context).colorScheme.onBackground,
                     fontSize: 24,
@@ -55,6 +59,41 @@ class MainDrawer extends StatelessWidget {
               onSetScreen('meal');
             },
           ),
+          if (role == 'admin')
+            ListTile(
+              leading: Icon(
+                Icons.restaurant,
+                size: 26,
+                color: Theme.of(context).colorScheme.onBackground,
+              ),
+              title: Text(
+                'Meals',
+                style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                      color: Theme.of(context).colorScheme.onBackground,
+                      fontSize: 24,
+                    ),
+              ),
+              onTap: () {
+                onSetScreen('meals-control');
+              },
+            ),
+          // ListTile(
+          //   leading: Icon(
+          //     Icons.category,
+          //     size: 26,
+          //     color: Theme.of(context).colorScheme.onBackground,
+          //   ),
+          //   title: Text(
+          //     'Categories',
+          //     style: Theme.of(context).textTheme.titleSmall!.copyWith(
+          //           color: Theme.of(context).colorScheme.onBackground,
+          //           fontSize: 24,
+          //         ),
+          //   ),
+          //   onTap: () {
+          //     onSetScreen('meal');
+          //   },
+          // ),
           ListTile(
             leading: Icon(
               Icons.settings,
@@ -70,6 +109,34 @@ class MainDrawer extends StatelessWidget {
             ),
             onTap: () {
               onSetScreen('filters');
+            },
+          ),
+          const SizedBox(
+            height: 50,
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.logout,
+              size: 26,
+              color: Theme.of(context).colorScheme.onBackground,
+            ),
+            title: Text(
+              'Logout',
+              style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                    color: Theme.of(context).colorScheme.onBackground,
+                    fontSize: 24,
+                  ),
+            ),
+            onTap: () {
+              LocalStorage.removeAll();
+
+              Future.delayed(const Duration(seconds: 1), () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (context) => LoginScreen(),
+                  ),
+                );
+              });
             },
           ),
         ],

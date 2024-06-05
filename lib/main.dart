@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:google_fonts/google_fonts.dart';
 import 'package:meals_app/screens/layout/layout.dart';
+import 'package:meals_app/screens/login_screen.dart';
+import 'package:meals_app/service/local_storage_service.dart';
 
 final theme = ThemeData(
   useMaterial3: true,
@@ -13,7 +15,12 @@ final theme = ThemeData(
   textTheme: GoogleFonts.latoTextTheme(),
 );
 
-void main() {
+// initilization storage
+
+Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await LocalStorage.init();
+
   runApp(const ProviderScope(child: App()));
 }
 
@@ -22,9 +29,10 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final role = LocalStorage.getStringData('role');
     return MaterialApp(
       theme: theme,
-      home: const Layout(),
+      home: role != null ? const Layout() : const LoginScreen(),
     );
   }
 }

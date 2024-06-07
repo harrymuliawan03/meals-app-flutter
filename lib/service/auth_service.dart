@@ -12,7 +12,8 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        final listUser = data.map((meal) => UserModel.fromJson(meal)).toList();
+        final listUser = data.map((user) => UserModel.fromJson(user)).toList();
+
         for (var user in listUser) {
           if (user.email == email && user.password == password) {
             return ResponseLogin(
@@ -31,17 +32,37 @@ class AuthService {
     }
   }
 
-  Future<bool> registerService(String body) async {
+  Future<bool> registerService(
+      String name, String email, String password) async {
     final headers = {'Content-Type': 'application/json'};
-    final response = await http.post(
-        Uri.parse('https://6658941e5c361705264910e7.mockapi.io/user'),
-        headers: headers,
-        body: body);
+    final body = jsonEncode({
+      "name": name,
+      "email": email,
+      "password": password,
+    });
+    final getUser = await http
+        .get(Uri.parse('https://6658941e5c361705264910e7.mockapi.io/user'));
 
-    if (response.statusCode == 201) {
-      return true;
+    if (getUser.statusCode == 200) {
+      final List<dynamic> data = json.decode(getUser.body);
+      final listUser = data.map((user) => UserModel.fromJson(user)).toList();
+
+      for (var user in listUser) {
+        if (user.email == email) {
+          return false;
+        }
+      }
+
+      final response = await http.post(
+          Uri.parse('https://6658941e5c361705264910e7.mockapi.io/user'),
+          headers: headers,
+          body: body);
+
+      if (response.statusCode == 201) {
+        return true;
+      }
+      return false;
     } else {
-      // throw Exception('Failed to load meals');
       return false;
     }
   }

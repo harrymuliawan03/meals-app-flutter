@@ -13,9 +13,6 @@ class MealsNotifier extends StateNotifier<List<Meal>> {
   }
 
   Future<void> addMeal(Meal meal) async {
-    // Add the meal to the server or database here
-    // For example: await addMealService(meal);
-    // After adding the meal, refresh the list
     await loadMeals();
   }
 }

@@ -52,42 +52,47 @@ class _MealsControlScreenState extends ConsumerState<MealsControlScreen> {
           ),
         ],
       ),
-      body: Container(
-          margin: const EdgeInsets.all(24),
-          child: ListView(
-            children: availableMealsAsyncValue
-                .map((availableMeals) => MealItemList(
-                      meal: availableMeals,
-                      onEdit: (context) async {
-                        final bool result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                MealEditScreen(meal: availableMeals),
-                          ),
-                        );
+      body: availableMealsAsyncValue.isNotEmpty
+          ? Container(
+              margin: const EdgeInsets.all(24),
+              child: ListView(
+                children: availableMealsAsyncValue
+                    .map((availableMeals) => MealItemList(
+                          meal: availableMeals,
+                          onEdit: (context) async {
+                            final bool result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    MealEditScreen(meal: availableMeals),
+                              ),
+                            );
 
-                        if (result == true) {
-                          showCustomSuccessSnackbar(
-                              context, 'Success Update Data');
-                          ref.refresh(mealsProvider);
-                        }
-                      },
-                      onDelete: () async {
-                        final bool result = await deleteMealService(
-                            int.parse(availableMeals.id));
+                            if (result == true) {
+                              showCustomSuccessSnackbar(
+                                  context, 'Success Update Data');
+                              ref.refresh(mealsProvider);
+                            }
+                          },
+                          onDelete: () async {
+                            final bool result = await deleteMealService(
+                                int.parse(availableMeals.id));
 
-                        if (result == true) {
-                          showCustomSuccessSnackbar(
-                              context, 'Success Delete Data');
-                          ref.refresh(mealsProvider);
-                        } else {
-                          showCustomSnackbar(context, 'Gagal Menghapus');
-                        }
-                      },
-                    ))
-                .toList(),
-          )),
+                            if (result == true) {
+                              showCustomSuccessSnackbar(
+                                  context, 'Success Delete Data');
+                              ref.refresh(mealsProvider);
+                            } else {
+                              showCustomSnackbar(context, 'Gagal Menghapus');
+                            }
+                          },
+                        ))
+                    .toList(),
+              ),
+            )
+          : const Center(
+              child: CircularProgressIndicator(),
+            ),
     );
   }
 }

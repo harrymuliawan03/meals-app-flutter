@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meals_app/data/dummy_data.dart';
 import 'package:meals_app/modules/meals/models/meals.dart';
 import 'package:meals_app/screens/meal_edit_screen.dart';
 
@@ -14,7 +15,14 @@ class MealItemList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String categories = meal.categories.join(', ');
+    List<String> categoriesFilter = availableCategories
+        .where((v) => meal.categories.contains(v.id))
+        .map((v) => v.title)
+        .toList();
+
+    print('categ $categoriesFilter');
+    String categories = categoriesFilter.join(' ');
+
     void _showDeleteConfirmationDialog(BuildContext context) {
       showDialog(
         context: context,

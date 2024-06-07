@@ -2,30 +2,31 @@
 
 import 'package:flutter/material.dart';
 import 'package:meals_app/screens/layout/layout.dart';
-import 'package:meals_app/screens/register_screen.dart';
 import 'package:meals_app/service/auth_service.dart';
 import 'package:meals_app/service/local_storage_service.dart';
 import 'package:meals_app/widgets/custom_snackbar.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   bool valueCheck = false;
   bool isHidePassword = true;
   bool isLoading = false;
   final AuthService authService = AuthService();
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  void fetchLogin(BuildContext context) async {
+  void postRegister(BuildContext context) async {
+    String name = _nameController.text;
     String email = _emailController.text;
     String password = _passwordController.text;
 
-    if (email.isEmpty || password.isEmpty) {
+    if (email.isEmpty || password.isEmpty || name.isEmpty) {
       showCustomSnackbar(context, 'Field Email / Password wajib diisi');
       return;
     }
@@ -35,17 +36,11 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      var response = await authService.loginService(email, password);
-      if (response.valid) {
-        await LocalStorage.saveData<String>('role', response.role!);
-        await LocalStorage.saveData<String>('user_name', response.name!);
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => Layout(),
-          ),
-        );
+      var response = await authService.registerService(name, email, password);
+      if (response) {
+        Navigator.pop(context);
       } else {
-        showCustomSnackbar(context, 'Email / Password salah');
+        showCustomSnackbar(context, 'Email sudah terdaftar');
       }
     } catch (e) {
       showCustomSnackbar(context, e.toString());
@@ -66,11 +61,10 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        margin: const EdgeInsets.symmetric(horizontal: 20.0),
         child: Column(
           children: [
             SizedBox(height: (appTopHeight + appBarHeight)),
-            // title
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -94,7 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(
               height: 30,
             ),
-            const Text('Login',
+            const Text('Register',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 36,
@@ -102,13 +96,23 @@ class _LoginScreenState extends State<LoginScreen> {
                   fontWeight: FontWeight.bold,
                 )),
             const SizedBox(height: 10),
-            const Text('Sign in to start your session',
+            const Text('Sign up to start your session',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.white,
                 )),
             const SizedBox(height: 40),
+            TextField(
+              controller: _nameController,
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Full Name',
+                prefixIcon: Icon(Icons.person),
+              ),
+            ),
+            const SizedBox(height: 20),
             TextField(
               controller: _emailController,
               style: const TextStyle(color: Colors.white),
@@ -141,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 20),
             TextButton(
               onPressed: () {
-                isLoading ? null : fetchLogin(context);
+                isLoading ? null : postRegister(context);
               },
               style: TextButton.styleFrom(
                   foregroundColor: Colors.white,
@@ -161,23 +165,19 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   SizedBox(width: isLoading ? 8 : 0),
-                  const Text('Login')
+                  const Text('Register')
                 ],
               ),
             ),
-
             const SizedBox(
               height: 30,
             ),
             TextButton(
-              onPressed: () async {
-                await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const RegisterScreen()));
+              onPressed: () {
+                Navigator.pop(context, false);
               },
-              child: Text(
-                "Don't have account? Register now",
+              child: const Text(
+                "Already have account? Login now",
                 style: TextStyle(color: Colors.white),
               ),
             ),

@@ -34,35 +34,39 @@ class AuthService {
 
   Future<bool> registerService(
       String name, String email, String password) async {
-    final headers = {'Content-Type': 'application/json'};
-    final body = jsonEncode({
-      "name": name,
-      "email": email,
-      "password": password,
-    });
-    final getUser = await http
-        .get(Uri.parse('https://6658941e5c361705264910e7.mockapi.io/user'));
+    try {
+      final headers = {'Content-Type': 'application/json'};
+      final body = jsonEncode({
+        "name": name,
+        "email": email,
+        "password": password,
+      });
+      final getUser = await http
+          .get(Uri.parse('https://6658941e5c361705264910e7.mockapi.io/user'));
 
-    if (getUser.statusCode == 200) {
-      final List<dynamic> data = json.decode(getUser.body);
-      final listUser = data.map((user) => UserModel.fromJson(user)).toList();
+      if (getUser.statusCode == 200) {
+        final List<dynamic> data = json.decode(getUser.body);
+        final listUser = data.map((user) => UserModel.fromJson(user)).toList();
 
-      for (var user in listUser) {
-        if (user.email == email) {
-          return false;
+        for (var user in listUser) {
+          if (user.email == email) {
+            return false;
+          }
         }
-      }
 
-      final response = await http.post(
-          Uri.parse('https://6658941e5c361705264910e7.mockapi.io/user'),
-          headers: headers,
-          body: body);
+        final response = await http.post(
+            Uri.parse('https://6658941e5c361705264910e7.mockapi.io/user'),
+            headers: headers,
+            body: body);
 
-      if (response.statusCode == 201) {
-        return true;
+        if (response.statusCode == 201) {
+          return true;
+        }
+        return false;
+      } else {
+        return false;
       }
-      return false;
-    } else {
+    } catch (e) {
       return false;
     }
   }

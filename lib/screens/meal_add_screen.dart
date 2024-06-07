@@ -25,11 +25,14 @@ class _MealAddScreenState extends State<MealAddScreen> {
   List<String> ingredients = [];
   List<String> steps = [];
 
+  final _formKey = GlobalKey<FormState>();
   final titleController = TextEditingController(text: '');
   final imageUrlController = TextEditingController(text: '');
   final durationController = TextEditingController(text: '');
   final ingredientsController = TextEditingController(text: '');
   final stepsController = TextEditingController(text: '');
+
+  bool _isLoading = false;
 
   List<String> splitToArray(String input) {
     List<String> items = [];
@@ -60,8 +63,20 @@ class _MealAddScreenState extends State<MealAddScreen> {
   @override
   Widget build(BuildContext context) {
     void handleSubmit() async {
+      setState(() {
+        _isLoading = true;
+      });
       ingredients = splitToArray(ingredientsController.text);
       steps = splitToArray(stepsController.text);
+
+      if (categories.isEmpty) {
+        categories.addAll(availableCategories.map((e) => e.id).toList());
+      }
+
+      if (characteristics.isEmpty) {
+        characteristics.addAll(
+            ['isGlutenFree', 'isVegan', 'isVegetarian', 'isLactoseFree']);
+      }
 
       categories.sort((a, b) {
         // Extract the numerical part and convert to int for comparison
@@ -85,6 +100,10 @@ class _MealAddScreenState extends State<MealAddScreen> {
       });
 
       final res = await createMealService(body);
+
+      setState(() {
+        _isLoading = false;
+      });
       if (res) {
         // Navigator.pushReplacement(
         //   context,
@@ -100,236 +119,249 @@ class _MealAddScreenState extends State<MealAddScreen> {
       appBar: AppBar(
         title: const Text('Add Meals'),
       ),
-      body: ListView(
-        padding: EdgeInsets.all(20),
-        children: [
-          InputWidget(
-            label: 'Title',
-            controller: titleController,
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          Text(
-            'Categories',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w400,
-              fontSize: 18,
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Wrap(
-            alignment: WrapAlignment.start,
-            // spacing: 20,
-            children: availableCategories
-                .map(
-                  (category) => CheckboxItem(
-                    categories: categories,
-                    onPress: (val) {
-                      setState(() {
-                        if (val!) {
-                          categories.add(category.id);
-                        } else {
-                          categories.remove(category.id);
-                        }
-                      });
-                    },
-                    name: category.title,
-                    category_code: category.id,
-                  ),
-                )
-                .toList(),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          Text(
-            'Characteristics',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w400,
-              fontSize: 18,
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Wrap(
-            alignment: WrapAlignment.start,
-            // spacing: 20,
-            children: [
-              CheckboxItem(
-                categories: characteristics,
-                onPress: (val) {
-                  setState(() {
-                    if (val!) {
-                      characteristics.add('isGlutenFree');
-                    } else {
-                      characteristics.remove('isGlutenFree');
-                    }
-                  });
-                },
-                name: 'Gluten Free',
-                category_code: 'isGlutenFree',
-              ),
-              CheckboxItem(
-                categories: characteristics,
-                onPress: (val) {
-                  setState(() {
-                    if (val!) {
-                      characteristics.add('isVegan');
-                    } else {
-                      characteristics.remove('isVegan');
-                    }
-                  });
-                },
-                name: 'Vegan',
-                category_code: 'isVegan',
-              ),
-              CheckboxItem(
-                categories: characteristics,
-                onPress: (val) {
-                  setState(() {
-                    if (val!) {
-                      characteristics.add('isVegetarian');
-                    } else {
-                      characteristics.remove('isVegetarian');
-                    }
-                  });
-                },
-                name: 'Vegetarian',
-                category_code: 'isVegetarian',
-              ),
-              CheckboxItem(
-                categories: characteristics,
-                onPress: (val) {
-                  setState(() {
-                    if (val!) {
-                      characteristics.add('isLactoseFree');
-                    } else {
-                      characteristics.remove('isLactoseFree');
-                    }
-                  });
-                },
-                name: 'Lactose Free',
-                category_code: 'isLactoseFree',
-              ),
-            ],
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          Text(
-            'Complexity',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w400,
-              fontSize: 18,
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Wrap(
-            children: <Widget>[
-              ListTile(
-                title: const Text('Simple'),
-                leading: Radio<Complexity>(
-                  value: Complexity.simple,
-                  groupValue: complexity,
-                  onChanged: (Complexity? value) {
-                    setState(() {
-                      complexity = value!;
-                      complexityValue = 'simple';
-                    });
-                  },
+      body: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                InputWidget(
+                  label: 'Title',
+                  controller: titleController,
                 ),
-              ),
-              ListTile(
-                title: const Text('Hard'),
-                leading: Radio<Complexity>(
-                  value: Complexity.hard,
-                  groupValue: complexity,
-                  onChanged: (Complexity? value) {
-                    setState(() {
-                      complexity = value!;
-                      complexityValue = 'hard';
-                    });
-                  },
+                const SizedBox(
+                  height: 20,
                 ),
-              ),
-              ListTile(
-                title: const Text('Challenging'),
-                leading: Radio<Complexity>(
-                  value: Complexity.challenging,
-                  groupValue: complexity,
-                  onChanged: (Complexity? value) {
-                    setState(() {
-                      complexity = value!;
-                      complexityValue = 'challenging';
-                    });
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          InputWidget(
-            label: 'Image Url',
-            controller: imageUrlController,
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          InputWidget(
-            label: 'Duration',
-            controller: durationController,
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          InputWidget(
-            label: 'Ingredients',
-            controller: ingredientsController,
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          InputWidget(
-            label: 'Steps',
-            controller: stepsController,
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          InkWell(
-            onTap: () {
-              handleSubmit();
-            },
-            child: Container(
-              padding: EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(56),
-                color: Colors.purple,
-              ),
-              child: Center(
-                child: Text(
-                  'SUBMIT',
+                const Text(
+                  'Categories',
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
                     color: Colors.white,
+                    fontWeight: FontWeight.w400,
+                    fontSize: 18,
                   ),
                 ),
-              ),
-            ),
-          ),
-        ],
+                const SizedBox(
+                  height: 10,
+                ),
+                Wrap(
+                  alignment: WrapAlignment.start,
+                  // spacing: 20,
+                  children: availableCategories
+                      .map(
+                        (category) => CheckboxItem(
+                          categories: categories,
+                          onPress: (val) {
+                            setState(() {
+                              if (val!) {
+                                categories.add(category.id);
+                              } else {
+                                categories.remove(category.id);
+                              }
+                            });
+                          },
+                          name: category.title,
+                          category_code: category.id,
+                        ),
+                      )
+                      .toList(),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                const Text(
+                  'Characteristics',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w400,
+                    fontSize: 18,
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Wrap(
+                  alignment: WrapAlignment.start,
+                  // spacing: 20,
+                  children: [
+                    CheckboxItem(
+                      categories: characteristics,
+                      onPress: (val) {
+                        setState(() {
+                          if (val!) {
+                            characteristics.add('isGlutenFree');
+                          } else {
+                            characteristics.remove('isGlutenFree');
+                          }
+                        });
+                      },
+                      name: 'Gluten Free',
+                      category_code: 'isGlutenFree',
+                    ),
+                    CheckboxItem(
+                      categories: characteristics,
+                      onPress: (val) {
+                        setState(() {
+                          if (val!) {
+                            characteristics.add('isVegan');
+                          } else {
+                            characteristics.remove('isVegan');
+                          }
+                        });
+                      },
+                      name: 'Vegan',
+                      category_code: 'isVegan',
+                    ),
+                    CheckboxItem(
+                      categories: characteristics,
+                      onPress: (val) {
+                        setState(() {
+                          if (val!) {
+                            characteristics.add('isVegetarian');
+                          } else {
+                            characteristics.remove('isVegetarian');
+                          }
+                        });
+                      },
+                      name: 'Vegetarian',
+                      category_code: 'isVegetarian',
+                    ),
+                    CheckboxItem(
+                      categories: characteristics,
+                      onPress: (val) {
+                        setState(() {
+                          if (val!) {
+                            characteristics.add('isLactoseFree');
+                          } else {
+                            characteristics.remove('isLactoseFree');
+                          }
+                        });
+                      },
+                      name: 'Lactose Free',
+                      category_code: 'isLactoseFree',
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                const Text(
+                  'Complexity',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w400,
+                    fontSize: 18,
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Wrap(
+                  children: <Widget>[
+                    ListTile(
+                      title: const Text('Simple'),
+                      leading: Radio<Complexity>(
+                        value: Complexity.simple,
+                        groupValue: complexity,
+                        onChanged: (Complexity? value) {
+                          setState(() {
+                            complexity = value!;
+                            complexityValue = 'simple';
+                          });
+                        },
+                      ),
+                    ),
+                    ListTile(
+                      title: const Text('Hard'),
+                      leading: Radio<Complexity>(
+                        value: Complexity.hard,
+                        groupValue: complexity,
+                        onChanged: (Complexity? value) {
+                          setState(() {
+                            complexity = value!;
+                            complexityValue = 'hard';
+                          });
+                        },
+                      ),
+                    ),
+                    ListTile(
+                      title: const Text('Challenging'),
+                      leading: Radio<Complexity>(
+                        value: Complexity.challenging,
+                        groupValue: complexity,
+                        onChanged: (Complexity? value) {
+                          setState(() {
+                            complexity = value!;
+                            complexityValue = 'challenging';
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                InputWidget(
+                  label: 'Image Url',
+                  controller: imageUrlController,
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                InputWidget(
+                  label: 'Duration',
+                  controller: durationController,
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                InputWidget(
+                  label: 'Ingredients',
+                  controller: ingredientsController,
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                InputWidget(
+                  label: 'Steps',
+                  controller: stepsController,
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                InkWell(
+                  onTap: () {
+                    if (_formKey.currentState?.validate() ?? false) {
+                      handleSubmit();
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(56),
+                      color: _isLoading ? Colors.grey : Colors.purple,
+                    ),
+                    child: Center(
+                      child: !_isLoading
+                          ? const Text(
+                              'SUBMIT',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(),
+                            ),
+                    ),
+                  ),
+                ),
+              ],
+            )),
       ),
     );
     ;

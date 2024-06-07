@@ -26,11 +26,14 @@ class _MealEditScreenState extends State<MealEditScreen> {
   List<String> ingredients = [];
   List<String> steps = [];
 
+  final _formKey = GlobalKey<FormState>();
   late final TextEditingController titleController;
   late final TextEditingController imageUrlController;
   late final TextEditingController durationController;
   late final TextEditingController ingredientsController;
   late final TextEditingController stepsController;
+
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -78,6 +81,9 @@ class _MealEditScreenState extends State<MealEditScreen> {
   @override
   Widget build(BuildContext context) {
     void handleSubmit() async {
+      setState(() {
+        _isLoading = true;
+      });
       ingredients = splitToArray(ingredientsController.text);
       steps = splitToArray(stepsController.text);
 
@@ -103,6 +109,11 @@ class _MealEditScreenState extends State<MealEditScreen> {
       });
 
       final res = await updateMealService(body, int.parse(widget.meal.id));
+
+      setState(() {
+        _isLoading = false;
+      });
+
       if (res) {
         // Navigator.pushReplacement(
         //   context,
@@ -116,238 +127,252 @@ class _MealEditScreenState extends State<MealEditScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Meals'),
+        title: const Text('Update Meals'),
       ),
-      body: ListView(
-        padding: EdgeInsets.all(20),
-        children: [
-          InputWidget(
-            label: 'Title',
-            controller: titleController,
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          Text(
-            'Categories',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w400,
-              fontSize: 18,
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Wrap(
-            alignment: WrapAlignment.start,
-            // spacing: 20,
-            children: availableCategories
-                .map(
-                  (category) => CheckboxItem(
-                    categories: categories,
+      body: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              InputWidget(
+                label: 'Title',
+                controller: titleController,
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              const Text(
+                'Categories',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w400,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Wrap(
+                alignment: WrapAlignment.start,
+                // spacing: 20,
+                children: availableCategories
+                    .map(
+                      (category) => CheckboxItem(
+                        categories: categories,
+                        onPress: (val) {
+                          setState(() {
+                            if (val!) {
+                              categories.add(category.id);
+                            } else {
+                              categories.remove(category.id);
+                            }
+                          });
+                        },
+                        name: category.title,
+                        category_code: category.id,
+                      ),
+                    )
+                    .toList(),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              const Text(
+                'Characteristics',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w400,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Wrap(
+                alignment: WrapAlignment.start,
+                // spacing: 20,
+                children: [
+                  CheckboxItem(
+                    categories: characteristics,
                     onPress: (val) {
                       setState(() {
                         if (val!) {
-                          categories.add(category.id);
+                          characteristics.add('isGlutenFree');
                         } else {
-                          categories.remove(category.id);
+                          characteristics.remove('isGlutenFree');
                         }
                       });
                     },
-                    name: category.title,
-                    category_code: category.id,
+                    name: 'Gluten Free',
+                    category_code: 'isGlutenFree',
                   ),
-                )
-                .toList(),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          Text(
-            'Characteristics',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w400,
-              fontSize: 18,
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Wrap(
-            alignment: WrapAlignment.start,
-            // spacing: 20,
-            children: [
-              CheckboxItem(
-                categories: characteristics,
-                onPress: (val) {
-                  setState(() {
-                    if (val!) {
-                      characteristics.add('isGlutenFree');
-                    } else {
-                      characteristics.remove('isGlutenFree');
-                    }
-                  });
-                },
-                name: 'Gluten Free',
-                category_code: 'isGlutenFree',
+                  CheckboxItem(
+                    categories: characteristics,
+                    onPress: (val) {
+                      setState(() {
+                        if (val!) {
+                          characteristics.add('isVegan');
+                        } else {
+                          characteristics.remove('isVegan');
+                        }
+                      });
+                    },
+                    name: 'Vegan',
+                    category_code: 'isVegan',
+                  ),
+                  CheckboxItem(
+                    categories: characteristics,
+                    onPress: (val) {
+                      setState(() {
+                        if (val!) {
+                          characteristics.add('isVegetarian');
+                        } else {
+                          characteristics.remove('isVegetarian');
+                        }
+                      });
+                    },
+                    name: 'Vegetarian',
+                    category_code: 'isVegetarian',
+                  ),
+                  CheckboxItem(
+                    categories: characteristics,
+                    onPress: (val) {
+                      setState(() {
+                        if (val!) {
+                          characteristics.add('isLactoseFree');
+                        } else {
+                          characteristics.remove('isLactoseFree');
+                        }
+                      });
+                    },
+                    name: 'Lactose Free',
+                    category_code: 'isLactoseFree',
+                  ),
+                ],
               ),
-              CheckboxItem(
-                categories: characteristics,
-                onPress: (val) {
-                  setState(() {
-                    if (val!) {
-                      characteristics.add('isVegan');
-                    } else {
-                      characteristics.remove('isVegan');
-                    }
-                  });
-                },
-                name: 'Vegan',
-                category_code: 'isVegan',
+              const SizedBox(
+                height: 20,
               ),
-              CheckboxItem(
-                categories: characteristics,
-                onPress: (val) {
-                  setState(() {
-                    if (val!) {
-                      characteristics.add('isVegetarian');
-                    } else {
-                      characteristics.remove('isVegetarian');
-                    }
-                  });
-                },
-                name: 'Vegetarian',
-                category_code: 'isVegetarian',
-              ),
-              CheckboxItem(
-                categories: characteristics,
-                onPress: (val) {
-                  setState(() {
-                    if (val!) {
-                      characteristics.add('isLactoseFree');
-                    } else {
-                      characteristics.remove('isLactoseFree');
-                    }
-                  });
-                },
-                name: 'Lactose Free',
-                category_code: 'isLactoseFree',
-              ),
-            ],
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          Text(
-            'Complexity',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w400,
-              fontSize: 18,
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Wrap(
-            children: <Widget>[
-              ListTile(
-                title: const Text('Simple'),
-                leading: Radio<Complexity>(
-                  value: Complexity.simple,
-                  groupValue: complexity,
-                  onChanged: (Complexity? value) {
-                    setState(() {
-                      complexity = value!;
-                      complexityValue = 'simple';
-                    });
-                  },
+              const Text(
+                'Complexity',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w400,
+                  fontSize: 18,
                 ),
               ),
-              ListTile(
-                title: const Text('Hard'),
-                leading: Radio<Complexity>(
-                  value: Complexity.hard,
-                  groupValue: complexity,
-                  onChanged: (Complexity? value) {
-                    setState(() {
-                      complexity = value!;
-                      complexityValue = 'hard';
-                    });
-                  },
-                ),
+              const SizedBox(
+                height: 10,
               ),
-              ListTile(
-                title: const Text('Challenging'),
-                leading: Radio<Complexity>(
-                  value: Complexity.challenging,
-                  groupValue: complexity,
-                  onChanged: (Complexity? value) {
-                    setState(() {
-                      complexity = value!;
-                      complexityValue = 'challenging';
-                    });
-                  },
-                ),
+              Wrap(
+                children: <Widget>[
+                  ListTile(
+                    title: const Text('Simple'),
+                    leading: Radio<Complexity>(
+                      value: Complexity.simple,
+                      groupValue: complexity,
+                      onChanged: (Complexity? value) {
+                        setState(() {
+                          complexity = value!;
+                          complexityValue = 'simple';
+                        });
+                      },
+                    ),
+                  ),
+                  ListTile(
+                    title: const Text('Hard'),
+                    leading: Radio<Complexity>(
+                      value: Complexity.hard,
+                      groupValue: complexity,
+                      onChanged: (Complexity? value) {
+                        setState(() {
+                          complexity = value!;
+                          complexityValue = 'hard';
+                        });
+                      },
+                    ),
+                  ),
+                  ListTile(
+                    title: const Text('Challenging'),
+                    leading: Radio<Complexity>(
+                      value: Complexity.challenging,
+                      groupValue: complexity,
+                      onChanged: (Complexity? value) {
+                        setState(() {
+                          complexity = value!;
+                          complexityValue = 'challenging';
+                        });
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          InputWidget(
-            label: 'Image Url',
-            controller: imageUrlController,
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          InputWidget(
-            label: 'Duration',
-            controller: durationController,
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          InputWidget(
-            label: 'Ingredients',
-            controller: ingredientsController,
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          InputWidget(
-            label: 'Steps',
-            controller: stepsController,
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          InkWell(
-            onTap: () {
-              handleSubmit();
-            },
-            child: Container(
-              padding: EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(56),
-                color: Colors.purple,
+              const SizedBox(
+                height: 20,
               ),
-              child: Center(
-                child: Text(
-                  'UPDATE',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+              InputWidget(
+                label: 'Image Url',
+                controller: imageUrlController,
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              InputWidget(
+                label: 'Duration',
+                controller: durationController,
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              InputWidget(
+                label: 'Ingredients',
+                controller: ingredientsController,
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              InputWidget(
+                label: 'Steps',
+                controller: stepsController,
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              TextButton(
+                onPressed: () {
+                  if (_formKey.currentState?.validate() ?? false) {
+                    handleSubmit();
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(15),
+                  // height: 56,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(56),
+                    color: _isLoading ? Colors.grey : Colors.purple,
+                  ),
+                  child: Center(
+                    child: !_isLoading
+                        ? const Text(
+                            'UPDATE',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(),
+                          ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
     ;

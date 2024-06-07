@@ -5,8 +5,8 @@ import 'package:meals_app/screens/meal_edit_screen.dart';
 
 class MealItemList extends StatelessWidget {
   final Meal meal;
-  final void Function(BuildContext context) onEdit;
-  final void Function() onDelete;
+  final void Function(BuildContext context, Meal meal) onEdit;
+  final void Function(String id) onDelete;
   const MealItemList(
       {super.key,
       required this.meal,
@@ -47,7 +47,7 @@ class MealItemList extends StatelessWidget {
                 child: const Text('Delete'),
                 onPressed: () {
                   Navigator.of(context).pop(); // Close the dialog
-                  onDelete(); // Perform the delete action
+                  onDelete(meal.id); // Perform the delete action
                 },
               ),
             ],
@@ -105,7 +105,7 @@ class MealItemList extends StatelessWidget {
           ),
           GestureDetector(
             onTap: () {
-              onEdit(context);
+              onEdit(context, meal);
             },
             child: const Icon(
               Icons.edit,

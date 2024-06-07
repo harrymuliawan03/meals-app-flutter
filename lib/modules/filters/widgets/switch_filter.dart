@@ -34,7 +34,7 @@ class SwitchFilter extends StatelessWidget {
             .labelMedium!
             .copyWith(color: Theme.of(context).colorScheme.onBackground),
       ),
-      activeColor: Theme.of(context).colorScheme.tertiary,
+      activeColor: Colors.blue,
       contentPadding: const EdgeInsets.only(left: 34, right: 22),
     );
   }

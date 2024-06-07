@@ -12,7 +12,8 @@ class FiltersScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Yours Filters'),
+        title:
+            const Text('Yours Filters', style: TextStyle(color: Colors.white)),
       ),
       body: Column(
         children: [

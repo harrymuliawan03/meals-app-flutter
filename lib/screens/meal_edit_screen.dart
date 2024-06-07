@@ -134,6 +134,7 @@ class _MealEditScreenState extends State<MealEditScreen> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               InputWidget(
                 label: 'Title',

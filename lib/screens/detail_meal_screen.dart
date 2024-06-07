@@ -18,7 +18,10 @@ class DetailMealScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(meal.title),
+        title: Text(
+          meal.title,
+          style: const TextStyle(color: Colors.white),
+        ),
         actions: [
           IconButton(
             onPressed: () {

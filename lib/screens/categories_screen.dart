@@ -39,20 +39,31 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     super.dispose();
   }
 
-  void _selectedCategoty(BuildContext context, Category category) {
-    final filteredMeals = widget.availableMeals
-        .where(
-          (meal) => meal.categories.contains(category.id),
-        )
-        .toList();
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (ctx) => MealsScreen(
-          meals: filteredMeals,
-          title: category.title,
+  void _selectedCategoty(BuildContext context, Category? category) {
+    if (category == null) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (ctx) => MealsScreen(
+            meals: widget.availableMeals,
+            title: 'All',
+          ),
         ),
-      ),
-    );
+      );
+    } else {
+      final filteredMeals = widget.availableMeals
+          .where(
+            (meal) => meal.categories.contains(category.id),
+          )
+          .toList();
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (ctx) => MealsScreen(
+            meals: filteredMeals,
+            title: category.title,
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -62,11 +73,17 @@ class _CategoriesScreenState extends State<CategoriesScreen>
       child: GridView(
         padding: const EdgeInsets.all(24),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 3 / 2,
-            crossAxisSpacing: 20,
-            mainAxisSpacing: 20),
+          crossAxisCount: 2,
+          childAspectRatio: 3 / 2,
+          crossAxisSpacing: 20,
+          mainAxisSpacing: 20,
+        ),
         children: [
+          CategoryItem(
+              category: null,
+              onSelectCategory: () {
+                _selectedCategoty(context, null);
+              }),
           for (final category in availableCategories)
             CategoryItem(
                 category: category,

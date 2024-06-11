@@ -3,9 +3,9 @@ import 'package:meals_app/modules/categories/models/category.dart';
 
 class CategoryItem extends StatelessWidget {
   const CategoryItem(
-      {super.key, required this.category, required this.onSelectCategory});
+      {super.key, this.category, required this.onSelectCategory});
 
-  final Category category;
+  final Category? category;
   final void Function() onSelectCategory;
 
   @override
@@ -18,13 +18,21 @@ class CategoryItem extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(colors: [
-            category.color.withOpacity(0.55),
-            category.color.withOpacity(0.9)
-          ], begin: Alignment.topLeft, end: Alignment.bottomRight),
+          gradient: LinearGradient(
+              colors: category != null
+                  ? [
+                      category!.color.withOpacity(0.55),
+                      category!.color.withOpacity(0.9)
+                    ]
+                  : [
+                      Colors.pink.withOpacity(0.55),
+                      Colors.pink.withOpacity(0.9),
+                    ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight),
         ),
         child: Text(
-          category.title,
+          category?.title ?? 'All',
           style: Theme.of(context)
               .textTheme
               .titleLarge!

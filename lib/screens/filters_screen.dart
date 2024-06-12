@@ -44,8 +44,8 @@ class FiltersScreen extends ConsumerWidget {
                   .read(filtersProvider.notifier)
                   .setFilter(Filter.vegetarian, isChecked);
             },
-            title: 'Vegetarian-free',
-            subTitle: 'Only include vegetarian-free meals.',
+            title: 'Vegetarian',
+            subTitle: 'Only include vegetarian meals.',
           ),
           SwitchFilter(
             checkedValue: activeFilters[Filter.vegan]!,
@@ -54,8 +54,8 @@ class FiltersScreen extends ConsumerWidget {
                   .read(filtersProvider.notifier)
                   .setFilter(Filter.vegan, isChecked);
             },
-            title: 'Vegan-free',
-            subTitle: 'Only include vegan-free meals.',
+            title: 'Vegan',
+            subTitle: 'Only include vegan meals.',
           ),
         ],
       ),

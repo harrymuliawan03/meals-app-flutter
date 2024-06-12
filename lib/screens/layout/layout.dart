@@ -29,7 +29,15 @@ class _LayoutState extends ConsumerState<Layout> {
   int _selectedPageIndex = 0;
   final name = LocalStorage.getStringData('user_name');
 
-  void _selectPage(int index) {
+  void _selectPage(int index) async {
+    if (index == 1) {
+      final availableMeals = ref.watch(filteredMealProvider);
+      if (availableMeals.isNotEmpty) {
+        await ref
+            .read(favoriteMealsProvider.notifier)
+            .initializeFavorites(availableMeals);
+      }
+    }
     setState(() {
       _selectedPageIndex = index;
     });

@@ -9,7 +9,7 @@ class UserModel {
   final String? email;
   final String? password;
   final String? role;
-  final String? id;
+  final int? id;
 
   UserModel({
     this.name,
@@ -22,7 +22,6 @@ class UserModel {
   factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
         name: json["name"],
         email: json["email"],
-        password: json["password"],
         role: json["role"],
         id: json["id"],
       );

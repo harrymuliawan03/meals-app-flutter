@@ -69,10 +69,20 @@ class DetailMealScreen extends ConsumerWidget {
                 child: Hero(
                   tag: meal.id,
                   child: Image.network(
-                    meal.imageUrl,
+                    meal.imageUrl ??
+                        'https://logowik.com/content/uploads/images/food-service4537.jpg',
                     height: 300,
                     width: double.infinity,
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      // Handle the error by returning a fallback image or displaying an error message
+                      return Image.network(
+                        'https://logowik.com/content/uploads/images/food-service4537.jpg',
+                        height: 300,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      );
+                    },
                   ),
                 ),
               ),

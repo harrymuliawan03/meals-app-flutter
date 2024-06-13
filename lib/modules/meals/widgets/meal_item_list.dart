@@ -6,7 +6,7 @@ import 'package:meals_app/screens/meal_edit_screen.dart';
 class MealItemList extends StatelessWidget {
   final Meal meal;
   final void Function(BuildContext context, Meal meal) onEdit;
-  final void Function(String id) onDelete;
+  final void Function(int id) onDelete;
   const MealItemList(
       {super.key,
       required this.meal,
@@ -72,10 +72,20 @@ class MealItemList extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(25.0), // Set the radius here
             child: Image.network(
-              meal.imageUrl,
+              meal.imageUrl ??
+                  'https://logowik.com/content/uploads/images/food-service4537.jpg',
               height: 50,
               width: 50,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                // Handle the error by returning a fallback image or displaying an error message
+                return Image.network(
+                  'https://logowik.com/content/uploads/images/food-service4537.jpg',
+                  height: 50,
+                  width: 50,
+                  fit: BoxFit.cover,
+                );
+              },
             ),
           ),
           const SizedBox(

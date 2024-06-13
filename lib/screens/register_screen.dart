@@ -38,7 +38,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     try {
       var response = await authService.registerService(name, email, password);
       if (response) {
-        Navigator.pop(context);
+        Navigator.pop(context, true);
       } else {
         showCustomSnackbar(context, 'Email sudah terdaftar');
       }

@@ -30,8 +30,8 @@ class _MealsControlScreenState extends ConsumerState<MealsControlScreen> {
   Widget build(BuildContext context) {
     final availableMealsAsyncValue = ref.watch(mealsProvider);
 
-    void onDelete(String id) async {
-      final bool result = await deleteMealService(int.parse(id));
+    void onDelete(int id) async {
+      final bool result = await deleteMealService(id);
 
       if (result == true) {
         if (context.mounted) {

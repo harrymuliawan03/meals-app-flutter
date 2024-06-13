@@ -171,12 +171,17 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             TextButton(
               onPressed: () async {
-                await Navigator.push(
+                final res = await Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => const RegisterScreen()));
+
+                if (res) {
+                  showCustomSuccessSnackbar(
+                      context, 'Register Succes, silahkan login');
+                }
               },
-              child: Text(
+              child: const Text(
                 "Don't have account? Register now",
                 style: TextStyle(color: Colors.white),
               ),

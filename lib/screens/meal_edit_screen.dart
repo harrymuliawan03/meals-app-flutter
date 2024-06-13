@@ -1,11 +1,14 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:meals_app/data/dummy_data.dart';
 import 'package:meals_app/modules/meals/models/meals.dart';
 import 'package:meals_app/screens/meals_control_screen.dart';
 import 'package:meals_app/service/meals_service.dart';
+import 'package:meals_app/shared/helpers/helpers.dart';
 import 'package:meals_app/widgets/checkbox_widget.dart';
 import 'package:meals_app/widgets/custom_snackbar.dart';
 import 'package:meals_app/widgets/input_widget.dart';
@@ -25,10 +28,11 @@ class _MealEditScreenState extends State<MealEditScreen> {
   String complexityValue = 'simple';
   List<String> ingredients = [];
   List<String> steps = [];
+  XFile? selectedImage;
+  String? image;
 
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController titleController;
-  late final TextEditingController imageUrlController;
   late final TextEditingController durationController;
   late final TextEditingController ingredientsController;
   late final TextEditingController stepsController;
@@ -40,8 +44,8 @@ class _MealEditScreenState extends State<MealEditScreen> {
     // TODO: implement initState
     super.initState();
 
+    image = widget.meal.imageUrl;
     titleController = TextEditingController(text: widget.meal.title);
-    imageUrlController = TextEditingController(text: widget.meal.imageUrl);
     durationController =
         TextEditingController(text: widget.meal.duration.toString());
     ingredientsController =
@@ -78,6 +82,22 @@ class _MealEditScreenState extends State<MealEditScreen> {
     return items;
   }
 
+  DecorationImage? _buildDecorationImage() {
+    if (selectedImage != null) {
+      return DecorationImage(
+        fit: BoxFit.cover,
+        image: FileImage(File(selectedImage!.path)),
+      );
+    } else if (image != null) {
+      return DecorationImage(
+        fit: BoxFit.cover,
+        image: NetworkImage(image!),
+      );
+    } else {
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     void handleSubmit() async {
@@ -98,7 +118,9 @@ class _MealEditScreenState extends State<MealEditScreen> {
         "title": titleController.text,
         "affordability": "affordable",
         "complexity": complexityValue,
-        "imageUrl": imageUrlController.text,
+        "image": selectedImage != null
+            ? 'data:image/png;base64,${base64Encode(File(selectedImage!.path).readAsBytesSync())}'
+            : null,
         "duration": int.parse(durationController.text),
         "ingredients": ingredients,
         "steps": steps,
@@ -108,7 +130,7 @@ class _MealEditScreenState extends State<MealEditScreen> {
         "isLactoseFree": characteristics.contains('isLactoseFree')
       });
 
-      final res = await updateMealService(body, int.parse(widget.meal.id));
+      final res = await updateMealService(body, widget.meal.id);
 
       setState(() {
         _isLoading = false;
@@ -312,9 +334,32 @@ class _MealEditScreenState extends State<MealEditScreen> {
               const SizedBox(
                 height: 20,
               ),
-              InputWidget(
-                label: 'Image Url',
-                controller: imageUrlController,
+              GestureDetector(
+                onTap: () async {
+                  final image = await selectImage();
+
+                  setState(() {
+                    selectedImage = image;
+                  });
+                },
+                child: Container(
+                  height: 120,
+                  width: 120,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(20)),
+                    color: Colors.grey,
+                    image: _buildDecorationImage(),
+                  ),
+                  child: selectedImage != null || image != null
+                      ? null
+                      : Center(
+                          child: Image.asset(
+                            'assets/ic_upload.png',
+                            width: 32,
+                            height: 32,
+                          ),
+                        ),
+                ),
               ),
               const SizedBox(
                 height: 20,

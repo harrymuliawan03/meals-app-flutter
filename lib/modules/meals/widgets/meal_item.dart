@@ -30,10 +30,20 @@ class MealItem extends StatelessWidget {
               tag: meal.id,
               child: FadeInImage(
                 placeholder: MemoryImage(kTransparentImage),
-                image: NetworkImage(meal.imageUrl),
+                image: NetworkImage(meal.imageUrl ??
+                    'https://logowik.com/content/uploads/images/food-service4537.jpg'),
                 fit: BoxFit.cover,
                 height: 200,
                 width: double.infinity,
+                imageErrorBuilder: (context, error, stackTrace) {
+                  // Handle the error by returning a fallback image or displaying an error message
+                  return Image.network(
+                    'https://logowik.com/content/uploads/images/food-service4537.jpg',
+                    height: 200,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  );
+                },
               ),
             ),
             Positioned(

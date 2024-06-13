@@ -1,11 +1,14 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:meals_app/data/dummy_data.dart';
 import 'package:meals_app/modules/meals/models/meals.dart';
 import 'package:meals_app/screens/meals_control_screen.dart';
 import 'package:meals_app/service/meals_service.dart';
+import 'package:meals_app/shared/helpers/helpers.dart';
 import 'package:meals_app/widgets/checkbox_widget.dart';
 import 'package:meals_app/widgets/custom_snackbar.dart';
 import 'package:meals_app/widgets/input_widget.dart';
@@ -24,6 +27,7 @@ class _MealAddScreenState extends State<MealAddScreen> {
   String complexityValue = 'simple';
   List<String> ingredients = [];
   List<String> steps = [];
+  XFile? selectedImage;
 
   final _formKey = GlobalKey<FormState>();
   final titleController = TextEditingController(text: '');
@@ -89,10 +93,12 @@ class _MealAddScreenState extends State<MealAddScreen> {
         "title": titleController.text,
         "affordability": "affordable",
         "complexity": complexityValue,
-        "imageUrl": imageUrlController.text,
         "duration": int.parse(durationController.text),
         "ingredients": ingredients,
         "steps": steps,
+        "image": selectedImage != null
+            ? 'data:image/png;base64,${base64Encode(File(selectedImage!.path).readAsBytesSync())}'
+            : null,
         "isGlutenFree": characteristics.contains('isGlutenFree'),
         "isVegan": characteristics.contains('isVegan'),
         "isVegetarian": characteristics.contains('isVegetarian'),
@@ -302,10 +308,46 @@ class _MealAddScreenState extends State<MealAddScreen> {
                 const SizedBox(
                   height: 20,
                 ),
-                InputWidget(
-                  label: 'Image Url',
-                  controller: imageUrlController,
+                GestureDetector(
+                  onTap: () async {
+                    final image = await selectImage();
+
+                    setState(() {
+                      selectedImage = image;
+                    });
+                  },
+                  child: Container(
+                    height: 120,
+                    width: 120,
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.all(Radius.circular(20)),
+                      color: Colors.grey,
+                      image: selectedImage == null
+                          ? null
+                          : DecorationImage(
+                              fit: BoxFit.cover,
+                              image: FileImage(
+                                File(
+                                  selectedImage!.path,
+                                ),
+                              ),
+                            ),
+                    ),
+                    child: selectedImage != null
+                        ? null
+                        : Center(
+                            child: Image.asset(
+                              'assets/ic_upload.png',
+                              width: 32,
+                              height: 32,
+                            ),
+                          ),
+                  ),
                 ),
+                // InputWidget(
+                //   label: 'Image Url',
+                //   controller: imageUrlController,
+                // ),
                 const SizedBox(
                   height: 20,
                 ),

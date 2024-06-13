@@ -1,11 +1,20 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:meals_app/modules/meals/models/meals.dart';
+import 'package:meals_app/service/local_storage_service.dart';
+
+final token = LocalStorage.getStringData('token');
+final headers = {
+  'Content-Type': 'application/json',
+  'Authorization': 'Bearer $token'
+};
 
 Future<List<Meal>> getMealsService() async {
   try {
-    final response = await http
-        .get(Uri.parse('https://6658941e5c361705264910e7.mockapi.io/meals'));
+    final response = await http.get(
+      Uri.parse('http://0.0.0.0:8000/api/meals'),
+      headers: headers,
+    );
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
@@ -20,9 +29,8 @@ Future<List<Meal>> getMealsService() async {
 
 Future<bool> createMealService(String body) async {
   try {
-    final headers = {'Content-Type': 'application/json'};
     final response = await http.post(
-        Uri.parse('https://6658941e5c361705264910e7.mockapi.io/meals'),
+        Uri.parse('http://127.0.0.1:8000/api/meals'),
         headers: headers,
         body: body);
 
@@ -39,9 +47,8 @@ Future<bool> createMealService(String body) async {
 
 Future<bool> updateMealService(String body, int id) async {
   try {
-    final headers = {'Content-Type': 'application/json'};
-    final response = await http.patch(
-        Uri.parse('https://6658941e5c361705264910e7.mockapi.io/meals/$id'),
+    final response = await http.put(
+        Uri.parse('http://127.0.0.1:8000/api/meals/$id'),
         headers: headers,
         body: body);
 
@@ -58,9 +65,8 @@ Future<bool> updateMealService(String body, int id) async {
 
 Future<bool> deleteMealService(int id) async {
   try {
-    final headers = {'Content-Type': 'application/json'};
     final response = await http.delete(
-      Uri.parse('https://6658941e5c361705264910e7.mockapi.io/meals/$id'),
+      Uri.parse('http://127.0.0.1:8000/api/meals/$id'),
       headers: headers,
     );
 

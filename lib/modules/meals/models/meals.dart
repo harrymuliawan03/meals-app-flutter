@@ -11,10 +11,10 @@ enum Affordability {
 }
 
 class Meal {
-  final String id;
+  final int id;
   final List<String> categories;
   final String title;
-  final String imageUrl;
+  final String? imageUrl;
   final List<String> ingredients;
   final List<String> steps;
   final int duration;
@@ -29,7 +29,7 @@ class Meal {
     required this.id,
     required this.categories,
     required this.title,
-    required this.imageUrl,
+    this.imageUrl,
     required this.ingredients,
     required this.steps,
     required this.duration,
@@ -43,10 +43,10 @@ class Meal {
 
   factory Meal.fromJson(Map<String, dynamic> json) {
     return Meal(
-      id: json['id'] as String,
+      id: json['id'] as int,
       categories: List<String>.from(json['categories']),
       title: json['title'] as String,
-      imageUrl: json['imageUrl'] as String,
+      imageUrl: json['image'] as String?,
       ingredients: List<String>.from(json['ingredients']),
       steps: List<String>.from(json['steps']),
       duration: json['duration'] as int,

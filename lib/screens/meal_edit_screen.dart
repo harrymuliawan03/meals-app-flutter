@@ -118,9 +118,9 @@ class _MealEditScreenState extends State<MealEditScreen> {
         "title": titleController.text,
         "affordability": "affordable",
         "complexity": complexityValue,
-        "image": selectedImage != null
-            ? 'data:image/png;base64,${base64Encode(File(selectedImage!.path).readAsBytesSync())}'
-            : null,
+        if (selectedImage != null)
+          "image":
+              'data:image/png;base64,${base64Encode(File(selectedImage!.path).readAsBytesSync())}',
         "duration": int.parse(durationController.text),
         "ingredients": ingredients,
         "steps": steps,

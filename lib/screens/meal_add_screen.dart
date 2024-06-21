@@ -2,26 +2,26 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meals_app/data/dummy_data.dart';
 import 'package:meals_app/modules/meals/models/meals.dart';
-import 'package:meals_app/screens/meals_control_screen.dart';
+import 'package:meals_app/providers/categories_provider.dart';
 import 'package:meals_app/service/meals_service.dart';
 import 'package:meals_app/shared/helpers/helpers.dart';
 import 'package:meals_app/widgets/checkbox_widget.dart';
 import 'package:meals_app/widgets/custom_snackbar.dart';
 import 'package:meals_app/widgets/input_widget.dart';
 
-class MealAddScreen extends StatefulWidget {
+class MealAddScreen extends ConsumerStatefulWidget {
   const MealAddScreen({super.key});
 
   @override
-  State<MealAddScreen> createState() => _MealAddScreenState();
+  ConsumerState<MealAddScreen> createState() => _MealAddScreenState();
 }
 
-class _MealAddScreenState extends State<MealAddScreen> {
-  final List<String> categories = [];
+class _MealAddScreenState extends ConsumerState<MealAddScreen> {
+  final List<int> categories = [];
   final List<String> characteristics = [];
   Complexity complexity = Complexity.simple;
   String complexityValue = 'simple';
@@ -66,6 +66,7 @@ class _MealAddScreenState extends State<MealAddScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final categoriesAvailable = ref.watch(categoriesProvider);
     void handleSubmit() async {
       setState(() {
         _isLoading = true;
@@ -74,7 +75,7 @@ class _MealAddScreenState extends State<MealAddScreen> {
       steps = splitToArray(stepsController.text);
 
       if (categories.isEmpty) {
-        categories.addAll(availableCategories.map((e) => e.id).toList());
+        categories.addAll(categoriesAvailable.map((e) => e.id).toList());
       }
 
       if (characteristics.isEmpty) {
@@ -83,10 +84,7 @@ class _MealAddScreenState extends State<MealAddScreen> {
       }
 
       categories.sort((a, b) {
-        // Extract the numerical part and convert to int for comparison
-        int numA = int.parse(a.substring(1));
-        int numB = int.parse(b.substring(1));
-        return numA.compareTo(numB);
+        return a.compareTo(b);
       });
       final body = jsonEncode({
         "categories": categories,
@@ -153,7 +151,7 @@ class _MealAddScreenState extends State<MealAddScreen> {
                 Wrap(
                   alignment: WrapAlignment.start,
                   // spacing: 20,
-                  children: availableCategories
+                  children: categoriesAvailable
                       .map(
                         (category) => CheckboxItem(
                           categories: categories,
@@ -166,7 +164,7 @@ class _MealAddScreenState extends State<MealAddScreen> {
                               }
                             });
                           },
-                          name: category.title,
+                          name: category.name,
                           category_code: category.id,
                         ),
                       )

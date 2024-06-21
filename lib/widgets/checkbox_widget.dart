@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class CheckboxItem extends StatelessWidget {
-  final List<String> categories;
-  final String category_code;
+  final List<dynamic> categories;
+  final dynamic category_code;
   final String name;
   final void Function(bool val) onPress;
 

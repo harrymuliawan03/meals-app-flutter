@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:meals_app/modules/categories/models/category.dart';
+import 'package:meals_app/modules/categories/models/category_model.dart';
 
 class CategoryItem extends StatelessWidget {
   const CategoryItem(
       {super.key, this.category, required this.onSelectCategory});
 
-  final Category? category;
+  final CategoryModel? category;
   final void Function() onSelectCategory;
 
   @override
@@ -32,7 +32,7 @@ class CategoryItem extends StatelessWidget {
               end: Alignment.bottomRight),
         ),
         child: Text(
-          category?.title ?? 'All',
+          category?.name ?? 'All',
           style: Theme.of(context)
               .textTheme
               .titleLarge!

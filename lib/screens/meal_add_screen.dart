@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:meals_app/data/dummy_data.dart';
 import 'package:meals_app/modules/meals/models/meals.dart';
 import 'package:meals_app/providers/categories_provider.dart';
 import 'package:meals_app/service/meals_service.dart';
@@ -20,7 +19,8 @@ class MealAddScreen extends ConsumerStatefulWidget {
   ConsumerState<MealAddScreen> createState() => _MealAddScreenState();
 }
 
-class _MealAddScreenState extends ConsumerState<MealAddScreen> {
+class _MealAddScreenState extends ConsumerState<MealAddScreen>
+    with SingleTickerProviderStateMixin {
   final List<String> categories = [];
   final List<String> characteristics = [];
   Complexity complexity = Complexity.simple;
@@ -29,6 +29,10 @@ class _MealAddScreenState extends ConsumerState<MealAddScreen> {
   List<String> steps = [];
   XFile? selectedImage;
 
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+  bool _isAddingSuccess = false;
+
   final _formKey = GlobalKey<FormState>();
   final titleController = TextEditingController(text: '');
   final imageUrlController = TextEditingController(text: '');
@@ -36,6 +40,7 @@ class _MealAddScreenState extends ConsumerState<MealAddScreen> {
   final ingredientsController = TextEditingController(text: '');
   final stepsController = TextEditingController(text: '');
 
+  double valueProgress = 0.0;
   bool _isLoading = false;
 
   List<String> splitToArray(String input) {
@@ -54,6 +59,25 @@ class _MealAddScreenState extends ConsumerState<MealAddScreen> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+    _animation = Tween<double>(
+      begin: 0,
+      end: valueProgress,
+    ).animate(_animationController)
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed && _isAddingSuccess) {
+          Navigator.pop(context, true);
+        }
+      });
+  }
+
+  @override
   void dispose() {
     // Dispose the controllers when the widget is disposed
     titleController.dispose();
@@ -67,10 +91,19 @@ class _MealAddScreenState extends ConsumerState<MealAddScreen> {
   @override
   Widget build(BuildContext context) {
     final categoriesAvailable = ref.watch(categoriesProvider);
+
+    void progressIndicator(int count, int total) {
+      print(count / total);
+      setState(() {
+        valueProgress = count / total;
+      });
+    }
+
     void handleSubmit() async {
       setState(() {
         _isLoading = true;
       });
+      _animationController.forward();
       ingredients = splitToArray(ingredientsController.text);
       steps = splitToArray(stepsController.text);
 
@@ -104,7 +137,7 @@ class _MealAddScreenState extends ConsumerState<MealAddScreen> {
         "isLactoseFree": characteristics.contains('isLactoseFree')
       });
 
-      final res = await createMealService(body);
+      final res = await createMealService(body, progressIndicator);
 
       setState(() {
         _isLoading = false;
@@ -114,7 +147,10 @@ class _MealAddScreenState extends ConsumerState<MealAddScreen> {
         //   context,
         //   MaterialPageRoute(builder: (context) => MealsControlScreen()),
         // );
-        Navigator.pop(context, true);
+        // Navigator.pop(context, true);
+        setState(() {
+          _isAddingSuccess = true;
+        });
       } else {
         showCustomSnackbar(context, 'Gagal Menyimpan');
       }
@@ -158,9 +194,8 @@ class _MealAddScreenState extends ConsumerState<MealAddScreen> {
                           categories: categories,
                           onPress: (val) {
                             setState(() {
-                              if (val!) {
+                              if (val) {
                                 categories.add(category.slug);
-                                print(category.id);
                               } else {
                                 categories.remove(category.slug);
                               }
@@ -372,18 +407,35 @@ class _MealAddScreenState extends ConsumerState<MealAddScreen> {
                 const SizedBox(
                   height: 20,
                 ),
-                InkWell(
-                  onTap: () {
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(55),
+                  child: TweenAnimationBuilder<double>(
+                    duration: const Duration(milliseconds: 1000),
+                    curve: Curves.easeInOut,
+                    tween: Tween<double>(
+                      begin: 0,
+                      end: valueProgress,
+                    ),
+                    builder: (context, value, _) => LinearProgressIndicator(
+                      value: value,
+                      // backgroundColor: kLightBackgroundColor,
+                      // valueColor: AlwaysStoppedAnimation(kGreenColor),
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                ElevatedButton(
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: Colors.purple),
+                  onPressed: () {
                     if (_formKey.currentState?.validate() ?? false) {
                       handleSubmit();
                     }
                   },
                   child: Container(
                     padding: const EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(56),
-                      color: _isLoading ? Colors.grey : Colors.purple,
-                    ),
                     child: Center(
                       child: !_isLoading
                           ? const Text(

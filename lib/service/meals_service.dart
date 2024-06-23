@@ -36,13 +36,14 @@ Future<List<Meal>> getMealsService() async {
   }
 }
 
-Future<bool> createMealService(String body) async {
+Future<bool> createMealService(
+    String body, void Function(int count, int total) progress) async {
   try {
     final response = await dio.post(
       '/meals',
       data: body,
       onSendProgress: (count, total) {
-        print('count: $count, total: $total');
+        progress(count, total);
       },
     );
 

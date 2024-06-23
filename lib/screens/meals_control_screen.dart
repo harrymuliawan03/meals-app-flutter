@@ -1,78 +1,85 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meals_app/modules/filters/widgets/switch_filter.dart';
 import 'package:meals_app/modules/meals/models/meals.dart';
 import 'package:meals_app/modules/meals/widgets/meal_item_list.dart';
-import 'package:meals_app/providers/filters_provider.dart';
-import 'package:meals_app/providers/meals_provider.dart';
 import 'package:meals_app/screens/meal_add_screen.dart';
 import 'package:meals_app/screens/meal_edit_screen.dart';
 import 'package:meals_app/service/meals_service.dart';
 import 'package:meals_app/widgets/custom_snackbar.dart';
 
-class MealsControlScreen extends ConsumerStatefulWidget {
+class MealsControlScreen extends StatefulWidget {
   const MealsControlScreen({super.key});
 
   @override
-  ConsumerState<MealsControlScreen> createState() => _MealsControlScreenState();
+  _MealsControlScreenState createState() => _MealsControlScreenState();
 }
 
-class _MealsControlScreenState extends ConsumerState<MealsControlScreen> {
+class _MealsControlScreenState extends State<MealsControlScreen> {
+  late Future<List<Meal>> _availableMealsFuture;
+
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // ref.refresh(mealsProvider); // Refresh the provider to fetch updated data
+  void initState() {
+    super.initState();
+    _availableMealsFuture = fetchMeals();
+  }
+
+  Future<List<Meal>> fetchMeals() async {
+    // Replace this with your actual service call
+    return await getMealsService();
+  }
+
+  void onDelete(int id) async {
+    final bool result = await deleteMealService(id);
+
+    if (result == true) {
+      if (context.mounted) {
+        showCustomSuccessSnackbar(context, 'Success Delete Data');
+        setState(() {
+          _availableMealsFuture = fetchMeals();
+        });
+      }
+    } else {
+      showCustomSnackbar(context, 'Gagal Menghapus');
+    }
+  }
+
+  void onEdit(BuildContext context, Meal availableMeals) async {
+    final bool result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MealEditScreen(meal: availableMeals),
+      ),
+    );
+
+    if (result == true) {
+      if (context.mounted) {
+        showCustomSuccessSnackbar(context, 'Success Update Data');
+        setState(() {
+          _availableMealsFuture = fetchMeals();
+        });
+      }
+    }
+  }
+
+  void onAdd() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MealAddScreen()),
+    );
+    if (result == true) {
+      if (context.mounted) {
+        showCustomSuccessSnackbar(context, 'Success Create Data');
+        setState(() {
+          _availableMealsFuture = fetchMeals();
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final availableMealsAsyncValue = ref.watch(mealsProvider);
-
-    void onDelete(int id) async {
-      final bool result = await deleteMealService(id);
-
-      if (result == true) {
-        if (context.mounted) {
-          showCustomSuccessSnackbar(context, 'Success Delete Data');
-          ref.refresh(mealsProvider);
-        }
-      } else {
-        showCustomSnackbar(context, 'Gagal Menghapus');
-      }
-    }
-
-    void onEdit(BuildContext context, Meal availableMeals) async {
-      final bool result = await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => MealEditScreen(meal: availableMeals),
-        ),
-      );
-
-      if (result == true) {
-        if (context.mounted) {
-          showCustomSuccessSnackbar(context, 'Success Update Data');
-          ref.refresh(mealsProvider);
-        }
-      }
-    }
-
-    void onAdd() async {
-      final result = await Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => MealAddScreen()),
-      );
-      if (result == true) {
-        if (context.mounted) {
-          showCustomSuccessSnackbar(context, 'Success Create Data');
-          ref.refresh(
-              mealsProvider); // Refresh the provider after returning from the add screen
-        }
-      }
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Meals Control'),
@@ -86,11 +93,27 @@ class _MealsControlScreenState extends ConsumerState<MealsControlScreen> {
           ),
         ],
       ),
-      body: availableMealsAsyncValue.isNotEmpty
-          ? Container(
+      body: FutureBuilder<List<Meal>>(
+        future: _availableMealsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text('Error: ${snapshot.error}'),
+            );
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(
+              child: Text('No meals available'),
+            );
+          } else {
+            final availableMeals = snapshot.data!;
+            return Container(
               margin: const EdgeInsets.all(24),
               child: ListView(
-                children: availableMealsAsyncValue
+                children: availableMeals
                     .map((availableMeals) => MealItemList(
                           meal: availableMeals,
                           onEdit: onEdit,
@@ -98,10 +121,10 @@ class _MealsControlScreenState extends ConsumerState<MealsControlScreen> {
                         ))
                     .toList(),
               ),
-            )
-          : const Center(
-              child: CircularProgressIndicator(),
-            ),
+            );
+          }
+        },
+      ),
     );
   }
 }

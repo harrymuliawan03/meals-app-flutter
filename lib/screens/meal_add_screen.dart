@@ -21,7 +21,7 @@ class MealAddScreen extends ConsumerStatefulWidget {
 }
 
 class _MealAddScreenState extends ConsumerState<MealAddScreen> {
-  final List<int> categories = [];
+  final List<String> categories = [];
   final List<String> characteristics = [];
   Complexity complexity = Complexity.simple;
   String complexityValue = 'simple';
@@ -75,7 +75,7 @@ class _MealAddScreenState extends ConsumerState<MealAddScreen> {
       steps = splitToArray(stepsController.text);
 
       if (categories.isEmpty) {
-        categories.addAll(categoriesAvailable.map((e) => e.id).toList());
+        categories.addAll(categoriesAvailable.map((e) => e.slug).toList());
       }
 
       if (characteristics.isEmpty) {
@@ -86,6 +86,7 @@ class _MealAddScreenState extends ConsumerState<MealAddScreen> {
       categories.sort((a, b) {
         return a.compareTo(b);
       });
+
       final body = jsonEncode({
         "categories": categories,
         "title": titleController.text,
@@ -158,14 +159,15 @@ class _MealAddScreenState extends ConsumerState<MealAddScreen> {
                           onPress: (val) {
                             setState(() {
                               if (val!) {
-                                categories.add(category.id);
+                                categories.add(category.slug);
+                                print(category.id);
                               } else {
-                                categories.remove(category.id);
+                                categories.remove(category.slug);
                               }
                             });
                           },
                           name: category.name,
-                          category_code: category.id,
+                          category_code: category.slug,
                         ),
                       )
                       .toList(),

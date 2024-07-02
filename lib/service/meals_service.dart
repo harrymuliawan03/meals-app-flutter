@@ -29,10 +29,10 @@ Future<List<Meal>> getMealsService() async {
       final List<dynamic> data = response.data;
       return data.map((meal) => Meal.fromJson(meal)).toList();
     } else {
-      throw Exception('Failed to load meals');
+      return [];
     }
   } catch (e) {
-    throw Exception(e.toString());
+    return [];
   }
 }
 

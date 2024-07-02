@@ -7,6 +7,7 @@ import 'package:meals_app/screens/filters_screen.dart';
 import 'package:meals_app/screens/layout/drawer/main_drawer.dart';
 import 'package:meals_app/screens/meals_control_screen.dart';
 import 'package:meals_app/screens/meals_screen.dart';
+import 'package:meals_app/screens/testing_riverpod_screen.dart';
 import 'package:meals_app/service/local_storage_service.dart';
 
 const kInitialFilters = {
@@ -56,6 +57,13 @@ class _LayoutState extends ConsumerState<Layout> {
       Navigator.of(context).push<Map<Filter, bool>>(
         MaterialPageRoute(
           builder: (ctx) => const MealsControlScreen(),
+        ),
+      );
+    }
+    if (identifier == 'testing-riverpod') {
+      Navigator.of(context).push<Map<Filter, bool>>(
+        MaterialPageRoute(
+          builder: (ctx) => const TestingRiverpodScreen(),
         ),
       );
     }

@@ -77,6 +77,24 @@ class MainDrawer extends StatelessWidget {
                 onSetScreen('meals-control');
               },
             ),
+
+          ListTile(
+            leading: Icon(
+              Icons.label,
+              size: 26,
+              color: Theme.of(context).colorScheme.onBackground,
+            ),
+            title: Text(
+              'Testing Riverpod',
+              style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                    color: Theme.of(context).colorScheme.onBackground,
+                    fontSize: 24,
+                  ),
+            ),
+            onTap: () {
+              onSetScreen('testing-riverpod');
+            },
+          ),
           // ListTile(
           //   leading: Icon(
           //     Icons.category,
